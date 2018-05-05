@@ -1,0 +1,1 @@
+export {addItem,scanQR,selectPlace,deSelectPlace} from './places.js' 

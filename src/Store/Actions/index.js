@@ -1,1 +1,1 @@
-export {addItem,scanQR,selectPlace,deSelectPlace} from './places.js' 
+export {addItemToNetwork,addItem,scanQR,selectPlace,deSelectPlace} from './places.js' 

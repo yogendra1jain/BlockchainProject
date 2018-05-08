@@ -3,7 +3,6 @@ import {Field,reduxForm} from 'redux-form';
 import {renderTextField} from '../MaterialUiComponents/materialUiComponent'
 import Paper from 'material-ui/Paper';
 import RaisedButton from 'material-ui/RaisedButton';
-import shippingObj from './shipingobj.js';
 import {connect} from 'react-redux';
 
 import {
@@ -14,15 +13,21 @@ import {
   } from 'material-ui/Table';
   import ScanQRCode from '../Common/scanQRCode.js';
   import ViewBlockChainData from '../Common/blockChainData'
-  import {scanQR} from '../../Store/Actions/index'
+  import {scanQR} from '../../Store/Actions/index';
+  import factory from '../../factory'
 class Shipping extends Component
 {
     constructor(props)
     {
         super(props);
-        this.state={datacame:false}
+        this.state={datacame:false,product:null}
     }
+    async componentDidMount() {
+    
+        const product = await factory.methods.getProduct().call();
+        this.setState({datacame:true,product:product});
 
+    }
     handleSubmit=(qrcode)=>
     {
     this.setState({datacame:true});
@@ -38,7 +43,7 @@ class Shipping extends Component
             <ScanQRCode onScanQR={this.handleSubmit}/>
              </Paper>
              {this.state.datacame?<Paper style={{marginTop:'10px'}}>
-             <ViewBlockChainData data={shippingObj}/>
+             <ViewBlockChainData data={this.state.product}/>
             <div style={{marginTop:'10px',display:'flex',flexDirection:'column',marginBottom:'10px'}}>
             <Field 
             component={renderTextField} 

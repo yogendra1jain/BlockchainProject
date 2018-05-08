@@ -12,8 +12,8 @@ switch (action.type){
  
     //Logic to Add a Item
    case ADD_ITEM:
-   console.log(action,"action")
-   //logic to add a item will come here
+   console.log(action,"action");
+   console.log(txreceipt);
    return {...state}
 
 

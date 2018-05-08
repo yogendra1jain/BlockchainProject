@@ -12,9 +12,25 @@ module.exports = {
       exclude: /node_modules/,
       loader: 'babel',
       query: {
-        presets: ['react', 'es2015', 'stage-1']
+        presets: ['react', 'es2015',"stage-0", 'stage-1']
       }
-    }]
+      
+    },
+    {
+      test: /\.json?$/,
+      loader: 'json-loader'
+  },
+			{
+				test: /\.(jpg|jpeg|png|gif|svg)(\?.*)?$/,
+						loader: 'file-loader',
+						query: {
+							name: 'static/images/[name].[hash:8].[ext]',
+						}
+					
+				
+			}
+  
+  ]
   },
   resolve: {
     extensions: ['', '.js', '.jsx']
@@ -22,5 +38,8 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     contentBase: './'
-  }
+  },
+
+  
+  
 };

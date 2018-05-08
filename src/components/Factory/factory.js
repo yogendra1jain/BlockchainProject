@@ -3,21 +3,59 @@ import {Field,reduxForm} from 'redux-form';
 import Paper from 'material-ui/Paper'
 import {renderTextField} from '../MaterialUiComponents/materialUiComponent'
 import RaisedButton from 'material-ui/RaisedButton';
-import {addItem} from '../../Store/Actions/index';
+import {addItemToNetwork} from '../../Store/Actions/index';
 import {connect} from 'react-redux';
 import validate from './validate';
+import web3 from '../../web3';
+import factory from '../../factory';
+
 
 class Factory extends Component
 {
-    factorySubmit=()=>
+    constructor(props)
     {
-        this.props.onAddItem(this.props.formValues)
+        super(props);
+    this.state = {imagesshow:false,errMessage:'',
+    txnSuccesfull:'NI'};
     }
+     factorySubmit=async ()=>
+    {
+     this.setState({imagesshow:true,errMessage:''})
+     try{
+     const accounts =   await  web3.eth.getAccounts()
+       const txreceipt = await factory.methods.createNewProduct(
+         parseInt(this.props.formValues.productID), 
+         this.props.formValues.productName, 
+         this.props.formValues.status, 
+         this.props.formValues.location, 
+         this.props.formValues.processingPlant, 
+         parseInt(this.props.formValues.qrCode), 
+         this.props.formValues.description).send({
+       from: accounts[0]
+       });
+       this.setState({txnSuccesfull:'T'});
+       let intervalID =  setInterval(()=>{
+       this.setState({txnSuccesfull:'NI'});
+       clearInterval(intervalID);
+       },3000)
+     
+    }
+    catch(err)
+    {
+        this.setState({errMessage:err.message,txnSuccesfull:'F'});
+        let intervalID =  setInterval(()=>{
+            this.setState({txnSuccesfull:'NI'});
+            clearInterval(intervalID);
+            },3000)
+    }
+       this.setState({imagesshow:false});     
+       }
     render()
     {
         return(
             
-            <div style={{marginLeft:'24%',marginRight:'24%'}}>
+           <div>
+               <div style={{marginLeft:'24%',marginRight:'24%'}}>
            <Paper style={{display:'flex',flexDirection:'column',justifyContent:'center',marginTop:'3%',marginBottom:'3%'}}>
             <div>
             <Field
@@ -61,14 +99,16 @@ class Factory extends Component
             label="Description"
              component={renderTextField}/>
              <div style={{display:'flex',justifyContent:'center',margin:'10px'}}>
-              <RaisedButton 
+             { !this.state.imagesshow?<RaisedButton 
               primary={true}
                label="submit"
                 onClick={this.factorySubmit}
-                disabled={this.props.invalid}/>
+                disabled={this.props.invalid}/>:<div><img height="65" width="65" src={require('../../images/sendingdata.gif')}/><p style={{margin:0}}>posting your data to blockchain....</p></div>}
+{this.state.txnSuccesfull=='T'?<img height="80" width="80" src={require('../../images/done.gif')}/>:<div>{this.state.txnSuccesfull=='F'?<img height="80" width="80" src={require('../../images/done.gif')}/>:null} </div>}
               </div>
              </Paper>
             
+             </div>
              </div>
             
         )
@@ -84,19 +124,35 @@ const FactoryForm =  reduxForm(
 
 const mapStateToProps=(state)=>
 {
+    const data = {
+        productID:'111',
+        
+        productName:'patnjali shapoo',
+        
+        status:'shipped',
+        
+        location:'haridwar plant',
+        
+        processingPlant:'surat',
+        
+        qrCode:'111',
+        
+        description:'shampoo for silky hair'
+        }
     let formValues = {}
     if(state.form&&state.form.FactoryForm&&state.form.FactoryForm.values)
     {
      formValues=state.form.FactoryForm.values
     }
-  return{
-      formValues
+  return{   
+      formValues:formValues,
+      initialValues:data
   }
 }
 const mapDispatchToProps = dispatch =>
 {
   return {
-    onAddItem:(item)=>dispatch(addItem(item))
+    onAddItem:(item)=>dispatch(addItemToNetwork(item))
   }
 }
 export default connect(mapStateToProps,mapDispatchToProps)(FactoryForm)

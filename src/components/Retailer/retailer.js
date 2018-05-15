@@ -14,19 +14,61 @@ import {
   } from 'material-ui/Table';
   import ScanQRCode from '../Common/scanQRCode.js';
   import ViewBlockChainData from '../Common/blockChainData'
-  import {scanQR} from '../../Store/Actions/index'
+  import {scanQR} from '../../Store/Actions/index';
+  import web3 from '../../web3';
+  import factory from '../../factory';
 class Retailer extends Component
 {
     constructor(props)
     {
         super(props);
-        this.state={datacame:false}
+        this.state={
+        datacame:false,
+        product:[],
+        imagesshow:false,
+        errMessage:'',
+        txnSuccesfull:'NI'
+    }
     }
 
-    handleSubmit=(qrcode)=>
+    handleSubmit=async ()=>
     {
-    this.setState({datacame:true});
-    this.props.onScanQR(qrcode);
+        this.setState({imagesshow:true});    
+            try {
+            const accounts = await web3.eth.getAccounts();
+            await factory.methods.newStatus( 
+                this.props.formValues.Status,  
+        this.props.formValues.LastProcessingPoint
+            ).send({
+            from: accounts[0]
+            });
+            this.setState({txnSuccesfull:'T'});
+            let intervalID =  setInterval(()=>{
+            this.setState({txnSuccesfull:'NI'});
+            clearInterval(intervalID);
+            },3000)
+    
+            } catch (err) {
+                this.setState({errMessage:err.message,txnSuccesfull:'F'});
+                let intervalID =  setInterval(()=>{
+                    this.setState({txnSuccesfull:'NI'});
+                    clearInterval(intervalID);
+                    },3000)
+            }
+            this.setState({imagesshow:false});    
+        
+    };
+    async componentDidMount() {
+    
+        const product = await factory.methods.getProduct().call();
+        this.setState({datacame:true,product:product});
+
+    }
+    async componentDidMount() {
+    
+        const product = await factory.methods.getProduct().call();
+        this.setState({datacame:true,product:product});
+
     }
     render()
     {
@@ -35,10 +77,10 @@ class Retailer extends Component
            
             <div style={{marginLeft:'24%',marginRight:'24%'}}>
            <Paper style={{display:'flex',flexDirection:'column',justifyContent:'center',marginTop:'3%',marginBottom:'3%'}}>
-            <ScanQRCode onScanQR={this.handleSubmit}/>
+            <ScanQRCode/>
              </Paper>
              {this.state.datacame?<Paper style={{marginTop:'10px'}}>
-             <ViewBlockChainData data={shippingObj}/>
+             <ViewBlockChainData data={this.state.product}/>
             <div style={{marginTop:'10px',display:'flex',flexDirection:'column',marginBottom:'10px'}}>
             <Field 
             component={renderTextField} 
@@ -57,9 +99,12 @@ class Retailer extends Component
                 marginTop:'3%',
                 marginBottom:'3%'
         }}>
-            <RaisedButton
-            primary={true} 
-            label="submit"/>
+             { !this.state.imagesshow?<RaisedButton 
+              primary={true}
+               label="submit"
+                onClick={this.handleSubmit}
+                disabled={this.props.invalid}/>:<div><img height="65" width="65" src={require('../../images/sendingdata.gif')}/><p style={{margin:0}}>posting your data to blockchain....</p></div>}
+{this.state.txnSuccesfull=='T'?<img height="80" width="80" src={require('../../images/done.gif')}/>:<div>{this.state.txnSuccesfull=='F'?<img height="80" width="80" src={require('../../images/done.gif')}/>:null} </div>}
             </div>
             </div>
              </Paper>:null}

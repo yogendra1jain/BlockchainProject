@@ -14,13 +14,18 @@ import {
   import ScanQRCode from '../Common/scanQRCode.js';
   import ViewBlockChainData from '../Common/blockChainData'
   import {scanQR} from '../../Store/Actions/index';
-  import factory from '../../factory'
+  import factory from '../../factory';
+  import web3 from '../../web3';
 class Shipping extends Component
 {
     constructor(props)
     {
         super(props);
-        this.state={datacame:false,product:null}
+        this.state={
+        datacame:false,
+        product:null,
+        txnSuccesfull:'NI'
+    }
     }
     async componentDidMount() {
     
@@ -28,10 +33,31 @@ class Shipping extends Component
         this.setState({datacame:true,product:product});
 
     }
-    handleSubmit=(qrcode)=>
-    {
-    this.setState({datacame:true});
-    this.props.onScanQR(qrcode);
+    handleSubmit=async ()=>{
+        this.setState({imagesshow:true});    
+        try {
+            debugger;
+            const accounts = await web3.eth.getAccounts();
+            await factory.methods.newShipment( 
+         this.props.formValues.Status,  
+        this.props.formValues.LastProcessingPoint,
+        this.props.formValues.ShippmentSequence).send({
+            from: accounts[0]
+            });
+            this.setState({txnSuccesfull:'T'});
+            let intervalID =  setInterval(()=>{
+            this.setState({txnSuccesfull:'NI'});
+            clearInterval(intervalID);
+            },3000)
+    
+            } catch (err) {
+                this.setState({errMessage:err.message,txnSuccesfull:'F'});
+                let intervalID =  setInterval(()=>{
+                    this.setState({txnSuccesfull:'NI'});
+                    clearInterval(intervalID);
+                    },3000)
+            }
+            this.setState({imagesshow:false});
     }
     render()
     {
@@ -40,7 +66,7 @@ class Shipping extends Component
            
             <div style={{marginLeft:'24%',marginRight:'24%'}}>
            <Paper style={{display:'flex',flexDirection:'column',justifyContent:'center',marginTop:'3%',marginBottom:'3%'}}>
-            <ScanQRCode onScanQR={this.handleSubmit}/>
+            <ScanQRCode/>
              </Paper>
              {this.state.datacame?<Paper style={{marginTop:'10px'}}>
              <ViewBlockChainData data={this.state.product}/>
@@ -68,9 +94,12 @@ class Shipping extends Component
                 marginTop:'3%',
                 marginBottom:'3%'
         }}>
-            <RaisedButton
-            primary={true} 
-            label="submit"/>
+             { !this.state.imagesshow?<RaisedButton 
+              primary={true}
+               label="submit"
+                onClick={this.handleSubmit}
+                disabled={this.props.invalid}/>:<div><img height="65" width="65" src={require('../../images/sendingdata.gif')}/><p style={{margin:0}}>posting your data to blockchain....</p></div>}
+{this.state.txnSuccesfull=='T'?<img height="80" width="80" src={require('../../images/done.gif')}/>:<div>{this.state.txnSuccesfull=='F'?<img height="80" width="80" src={require('../../images/done.gif')}/>:null} </div>}
             </div>
             </div>
              </Paper>:null}

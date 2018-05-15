@@ -9,6 +9,8 @@ import Shipping from './Shipping/shipping';
 import ThirdPartyLogistic from './ThirdPartyLogistic/thirdPartyLogistic';
 import Retailer from './Retailer/retailer';
 import Consumer from './Consumer/consumer';
+
+
  class App extends Component {
   render() {
   	console.log(this.props)
@@ -52,6 +54,8 @@ import Consumer from './Consumer/consumer';
       <Consumer/>
     </Tab>
   </Tabs>
+  
+
       </div>
     );
   }

@@ -8,6 +8,9 @@ import {connect} from 'react-redux';
 import validate from './validate';
 import web3 from '../../web3';
 import factory from '../../factory';
+var QRCode = require('qrcode.react');
+
+
 
 
 class Factory extends Component
@@ -52,6 +55,8 @@ class Factory extends Component
        }
     render()
     {
+    console.log(this.props,"dfdfdf")
+
         return(
             
            <div>
@@ -87,11 +92,14 @@ class Factory extends Component
             name="processingPlant"
             label="Processing Plant"
              component={renderTextField}/>
+            <div >
              <Field
             name="qrCode"
             label="QR Code"
-            style={{marginLeft:'6%'}}
+            style={{marginLeft:'9%'}}
              component={renderTextField}/>
+             {this.props.formValues&&this.props.formValues.qrCode?<QRCode size={36} value={this.props.formValues.qrCode}/>:null}
+             </div>
              </div> 
              <Field
              style={{marginLeft:'9%',marginBottom:'3%'}}
@@ -107,7 +115,7 @@ class Factory extends Component
 {this.state.txnSuccesfull=='T'?<img height="80" width="80" src={require('../../images/done.gif')}/>:<div>{this.state.txnSuccesfull=='F'?<img height="80" width="80" src={require('../../images/done.gif')}/>:null} </div>}
               </div>
              </Paper>
-            
+          
              </div>
              </div>
             
@@ -140,13 +148,14 @@ const mapStateToProps=(state)=>
         description:'shampoo for silky hair'
         }
     let formValues = {}
+    console.log(state)
     if(state.form&&state.form.FactoryForm&&state.form.FactoryForm.values)
     {
      formValues=state.form.FactoryForm.values
     }
   return{   
       formValues:formValues,
-      initialValues:data
+//initialValues:data
   }
 }
 const mapDispatchToProps = dispatch =>

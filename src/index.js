@@ -8,10 +8,13 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {cyan500} from 'material-ui/styles/colors';
 import configureStore from '../src/Store/configureStore';
+require("babel-core/register");
+require("babel-polyfill");
+
 const store = configureStore();
 const muiTheme = getMuiTheme({
   palette: {
-     primary1Color: 'green',
+     primary1Color: 'black',
     primary2Color: cyan500,
     primary3Color: cyan500,
   }
